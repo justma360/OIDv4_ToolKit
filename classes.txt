@@ -1,3 +1,4 @@
-Apple
-Orange
-Light switch
+Bicycle
+Bicycle_helmet
+Skateboard
+Person

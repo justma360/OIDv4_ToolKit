@@ -22,16 +22,26 @@ from modules.show import *
 from modules.csv_downloader import *
 from modules.bounding_boxes import *
 from modules.image_level import *
+import subprocess
 
+ROOT_DIR = ""
+DEFAULT_OID_DIR = os.path.join(ROOT_DIR, "OID")
 
-ROOT_DIR = ''
-DEFAULT_OID_DIR = os.path.join(ROOT_DIR, 'OID')
-
-if __name__ == '__main__':
+if __name__ == "__main__":
 
     args = parser_arguments()
 
-    if args.command == 'downloader_ill':
+    if args.command == "downloader_ill":
         image_level(args, DEFAULT_OID_DIR)
     else:
         bounding_boxes_images(args, DEFAULT_OID_DIR)
+
+    subprocess.Popen([r"..\venv\Scripts\python.exe", "yolov5_convert_annotations.py"])
+
+    DATASET_FOLDER = os.path.join(DEFAULT_OID_DIR, "Dataset")
+    for dataset in os.listdir(DATASET_FOLDER):
+        for objects in os.listdir(os.path.join(DATASET_FOLDER, dataset)):
+            src = os.path.join(DATASET_FOLDER, dataset, objects)
+            object_new_name = objects.lower().replace(" ", "_")
+            dest = os.path.join(DATASET_FOLDER, dataset, object_new_name)
+            os.rename(src, dest)

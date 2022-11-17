@@ -1,266 +1,346 @@
-<h1> Forked repository and added conversion python script </h1>
-My added script is: 
-<strong>convert_annotations.py</strong>
+# Yolov5 Application Documentation
 
-Use toolkit normally to gather images from open images dataset. After gathering images just run from root directory:
-```bash
-python convert_annotations.py
+### I. Development Environment Set-up
+
+1. Install [python](https://git-scm.com/download/win)
+    * Version 3.8 would be needed
+      ```bash 
+      https://nodejs.org/dist/v14.15.5/node-v14.15.5-x64.msi
+      ```
+
+2. Install [**git**](https://git-scm.com/download/win)
+    * Use Windows 64-bit Standalone Installer
+      ```bash 
+      https://git-scm.com/download/win
+      ```
+
+3. Install [**pip**](https://bootstrap.pypa.io/get-pip.py)
+    * to install packages that aren't part of the Python standard library
+    * download the **get-pip.py** file by typing on terminal:
+      ```bash
+      curl https://bootstrap.pypa.io/get-pip.py -o get-pip.py
+      ```
+
+
+4. Install [**Visual Studio Code**](https://code.visualstudio.com/download#)
+    ```bash 
+      https://code.visualstudio.com/download#
+    ```
+
+1. Install [**Anaconda**](https://www.anaconda.com/products/distribution)
+    * To create programming environment to install and store libraries and packages 
+      ```bash
+      https://www.anaconda.com/products/distribution
+      ```
+
+
+---
+### II. Installlation
+Download all the required programme-related packages
+
+1. Install Yolov5 
+    ```bash
+    git clone https://github.com/ultralytics/yolov5.git
+    ```
+
+
+2. Create a new virtual environment for yolov5
+    ```
+    cd .../yolov5
+    python -m venv venv
+    venv\Scripts\activate
+    ```
+
+
+3. Open the repository package and install all the required packages needed
+    ```bash 
+    pip install -r requirements.txt
+    ```
+    * Requirement.txt already includes python >=3.8 and pytorch >=1.7
+
+
+
+4. Import pytorch (pytorch>=1.7) to the directory
+    ```bash
+    import torch
+    ```
+
+
+---
+### III. Interference
+1. Containing all image that are to be tested on the data image file in yolov5
+    * the image should be stored in:
+    ```json
+    .../yolov5/data/images
+    ```
+
+    * Note: the folder should already contain two images **"bus.jpg"** and **"zidane.jpg"**
+
+
+2. Use **yolov5** to perform object detection
+    ```bash 
+        python detect.py --source OPTION
+    ```
+
+    * Replace OPTION with **"data/images"** to detect all the image in the  file
+        * To detect recording from webcam, replace **"OPTION"** with **"0"**
+        * To detect image, replace **"OPTION"** with **"filename.jpg"**
+        * To detect video, replace **"OPTION"** with **"filename.mp4"**  
+        * For other option, please see <https://docs.ultralytics.com/quick-start/>
+        
+    * Results are saved to **"./runs/detect"**
+
+
+---
+### IV. Dataset
+Dataset would be needed to train and validate the model. 
+
+Dataset can be obtained from:
+
+* coco128 dataset (included) 
+  * Included within Yolov5. To edit, open **"coco128.yaml"** from **"yolov5/data/"** and follow instruction below starting from **step V.8**
+
+  ```json
+  python train.py --img 640 --batch 16 --epochs 3 --data coco128.yaml --weights yolov5s.pt
+  ```
+
+  * High quality dataset sample but only 80 type of class available
+  * Noted that the dataset for validation is not included
+  * For more detail, please see
+    ```
+    https://github.com/ultralytics/yolov5/blob/master/data/coco128.yaml
+    ```
+
+
+* &ensp; [Roboflow](https://roboflow.com/)
+  * Can manually create labels on own custom dataset or uses prelabeled public dataset available, but requires large amount of time and performance cannot be compared with that of coco128 dataset.
+
+    ```bash
+    https://roboflow.com/
+    ```
+
+
+* There are other dataset available for autodownload, including VOC, Argoverse, Objects365, and etc
+
+* After selection, export the dataset in the format of Yolo v5 Pytorch and download the zipped dataset
+
+
+---
+
+### V. Validation & Training 
+1. Find location of **"images"** and **"label"** from the unzipped downloaded dataset
+    * Location could generally be found within (may vary):
+        ```bash 
+        ../train
+        ../val
+        ../test
+        ```   
+    * Organize all images and labels from the zipped folder in terms of **"images"** and **"labels"** instead of **"train"**, **"val"** and **"test"** (Optional) 
+        * example:
+            ```bash
+            ../images/train
+            ../images/val
+            ../images/test
+            ```
+
+2. Create a file outside the yolov5 folder named **"datasets"** to store downloaded dataset 
+    ```json
+        ../datasets
+    ```
+
+
+3. Create a new file  **"filename"** to store the organized folder **"images"** and **"labels"** (Optional)
+    * The two filename **"images"** and **"labels"** should be located in:
+        ```json
+        ../datasets/<filename>/images
+        ../datasets/<filename>/labels
+        ```
+
+
+4. Copy the **"coco128.yaml"** and move the copy **".yaml"**  to within the downloaded dataset Yolo v5 file
+    * The **".yaml"** document should be moved to:
+        ```json
+        yolov5\data
+        ```
+
+
+5. Open the **".yaml"** document and add the path of the dataset folder to the document 
+    ```bash 
+        path: .../dataset/<filename>  # dataset root dir, filename: OBJECT
+        train: images/train
+        val: images/val
+        test: images/test
+    ```      
+    * Please be noticed that the **".../"** should be taken as a reference only, if error occurs, please try **"../"** or **"./"**.
+    * train/val/test are sets as 
+        1) dir: path/to/imgs 
+        2) file: path/to/imgs.txt 
+        3) list: [path/to/imgs1, path/to/imgs2, ..]
+
+
+6. Within the **".yaml"** document, edit the number of classes and the name of the class
+    ```bash
+        names: 
+         0: skateboard
+         1: snowboard
+         2: surfboard           # Classes names     
+    ```
+
+
+
+7. Validate tha accuracy of the Yolo v5 model by running the command:
+    ```json
+        python val.py --weights yolov5s.pt --data <filename>.yaml --img 640 --half
+    ```
+    * The validation result are stored in
+    ```json
+    runs/val/exp
+    ```
+
+8. Before training you **must** adjust the yolov5s.pt to match the number of classes by going into **yolov5s.pt** and adjusting `nc=80 <coco dataset number of classes>` to number of classes  
+
+9. Train the Yolo V5 model by specifying image size, batch-size, number of epochs, dataset and the pretrained **--weights yolov5s.pt**
+   ```json
+    python train.py --img 640 --batch 16 --epochs 3 --data <datafilename>.yaml --weights yolov5s.pt
+   ```
+    * detail (): 
+        * img = image size in pixels 
+        * batch = batch size
+        * epochs = number of epochs
+        * data = path to the data-configuration file
+        * weight = path to the initial weight
+        * `--cfg <filename>.yaml` = path to the model-configuration file (optional)
+
+   &nbsp;
+
+   * There are multiple model architecture available, with **"yolov5n"** as the smallest and fastest, **"yolov5s"**, **"yolov5m"**, **"yolov5l"**, and **"yolov5x"** as the largest model avaliable
+
+   * For the sample above, the **"yolov5s"** model was trained on the dataset `**<datafilename>"**` for **3 epochs**, with the image size defined as **640*480** and the batch-size as **16**
+
+   * After training, the train result are stored in
+        ```json
+        runs/train/exp
+        ```
+        * A model named **"best.pt"** should be contained within the file
+            ```json
+            runs/train/exp/weights/best.pt
+            ```
+
+
+---
+### VI. Update Model
+1. Move the document **"best.pt"** to the main file **"yolov5"**
+    ```json
+    yolov5/best.pt
+    ```
+    
+2. Run 
+    ```
+    python detect.py --weights <weights_name>.pt --source <image directory>
+    python detect.py --weights best.pt --source data/images
+    ```
+
+**Optionally** 
+
+3. Open the document **"detect.py"**
+    ```json
+     yolov5/detect.py
+    ```
+
+
+4. Within the document **"detect.py"**, find:
+    ```bash
+    @smart_inference_mode()
+    def run(
+        weights=ROOT / 'yolov5s.pt',  # model.pt path(s)
+    ```
+    Rename **'yolov5s.pt"** to **'best.pt'** mentioned above
+
+
+
+5. Within the document **"detect.py"**, find
+    ```bash
+    parser.add_argument('--weights', nargs='+', type=str, default=ROOT / 'yolov5s.pt', help='model path(s)')
+    ```
+
+    Rename **'yolov5s.pt'** to **'best.pt'**
+
+
+
+6. To test the trained model **'best.pt'**:
+    ```bash 
+        python detect.py --source OPTION
+    ```
+    * Results are saved to "./runs/detect"
+
+
+---
+
+### Footnote
+
+Please be noticed that the **".../"** for ```cd command``` is the **pathname** that should be defined by user, the example written in this guide is only the simplified path for one's reference.
+
+---
+### Additional: Open Images Tool 
+
+1. install OIDv4 from github
+```bash 
+git clone https://github.com/theAIGuysCode/OIDv4_ToolKit.git
 ```
-This will generate .txt annotation files in proper format for custom object detection with YOLOv3. The text files are generated in folder with images.
 
-<h1 align="center"> ~ OIDv4 ToolKit ~ </h1>
 
-Do you want to build your personal object detector but you don't have enough images to train your model? Do you want to train your personal image classifier, but you are tired of the deadly slowness of ImageNet? Have you already discovered [Open Images Dataset v4](https://storage.googleapis.com/openimages/web/index.html) that has [600](https://storage.googleapis.com/openimages/2018_04/bbox_labels_600_hierarchy_visualizer/circle.html) classes and more than 1,700,000 images with related bounding boxes ready to use? Do you want to exploit it for your projects but you don't want to download gigabytes and gigabytes of data!?
+2. install requirement package(may need upgrade on pip)
+ ```bash 
+ pip install -r requirements.txt
+ ```
 
-With this repository we can help you to get the best of this dataset with less effort as possible.
-In particular, with this practical ToolKit written in Python3 we give you, for both object detection and image classification tasks, the following options:
 
-**(2.0) Object Detection**
+3. Move the path to the correct directory
+ ```bash
+ cd OIDv4_ToolKit
+ ```
 
-* download any of the [600](https://storage.googleapis.com/openimages/2018_04/bbox_labels_600_hierarchy_visualizer/circle.html) classes of the dataset individually, taking care of creating the related bounding boxes for each downloaded image
-* download multiple classes at the same time creating separated folder and bounding boxes for each of them
-* download multiple classes and creating a common folder for all of them with a unique annotation file of each image
-* download a single class or multiple classes with the desired [attributes](https://storage.googleapis.com/openimages/web/download.html)
-* use the practical visualizer to inspect the donwloaded classes
 
-**(3.0) Image Classification**
+4. Edit the order of the class from the txt file included in
+ ```bash 
+    \OIDv4_ToolKit\classes.txt
+ ```
+* example:
+ ```bash
+ Man
+ Woman
+ Dog
+ ```
 
-* download any of the [19,794](https://storage.googleapis.com/openimages/web/download.html#attributes) classes in a common labeled folder
-* exploit tens of possible commands to select only the desired images (ex. like only test images)
 
-The code is quite documented and designed to be easy to extend and improve.
-Me and [Angelo](https://github.com/keldrom) are pleased if our little bit of code can help you with your project and research. Enjoy ;)
+5. Terminal
+ ```bash 
+ python main.py downloader --classes Man Woman Dog --type_csv train --limit 100
+ ```
 
-![Snippet of the OIDv4 available classes](images/classes.png)
+* CLassify desired classes. In this example, **"Man"**, **"Woman"**, **"Dog"** is classified as the desired classes
+* Classify desired type of datasest (train, val, test). In this example, the type  **"train"** was taken
 
-# Open Image Dataset v4
-All the information related to this huge dataset can be found [here](https://storage.googleapis.com/openimages/web/index.html).
-In these few lines are simply summarized some statistics and important tips.
 
-**Object Detection**
+6. Convert the format of the label to yolov5 with:
+ ```bash 
+ python convert_annotations.py
+ ```
+* Results are saved to "./OID/Dataset/"
 
-<table>
-    <tr><td></td><td><b>Train<b></td><td><b>Validation<b></td><td><b>Test<b></td><td><b>#Classes<b></td></tr>
-    <tr><td>Images</td><td>1,743,042</td><td>41,620	</td><td>125,436</td><td>-</td></tr>
-    <tr><td>Boxes</td><td>14,610,229</td><td>204,621</td><td>625,282</td><td>600</td></tr>
-</table>
 
-**Image Classification**
+7. Create a yaml file including the path to the image and label dataset, the name and number of the class, and attach it to the yolov5 file
 
-<table>
-    <tr><td></td><td><b>Train<b></td><td><b>Validation<b></td><td><b>Test<b></td><td><b>#Classes<b></td></tr>
-    <tr><td>Images</td><td>9,011,219</td><td>41,620</td><td>125,436</td><td>-</td></tr>
-    <tr><td>Machine-Generated Labels</td><td>78,977,695</td><td>512,093</td><td>1,545,835</td><td>7,870</td></tr>
-    <tr><td>Human-Verified Labels</td><td>27,894,289</td><td>551,390</td><td>1,667,399</td><td>19,794</td></tr>
-</table>
+* example:
+ ```yaml
+ path: ../datasets/OIDv4  # dataset root dir
+ train: images/train2022  # train images (relative to 'path') 128 images
+ val: images/train2022
 
-As it's possible to observe from the previous table we can have access to images from free different groups: train, validation and test.
-The ToolKit provides a way to select only a specific group where to search.
-Regarding object detection, it's important to underline that some annotations has been done as a group. It means that a single bounding box groups more than one istance. As mentioned by the creator of the dataset:
-- **IsGroupOf**: Indicates that the box spans a group of objects (e.g., a bed of flowers or a crowd of people). We asked annotators to use this tag for cases with more than 5 instances which are heavily occluding each other and are physically touching.
-That's again an option of the ToolKit that can be used to only grasp the desired images.
+ names: 
+  0: Man
+  1: Woman
+  2: Dog
+ ```
 
-Finally, it's interesting to notice that not all annotations has been produced by humans, but the creator also exploited an enhanced version of the method shown here reported [1](#reference)
-
-# 1.0 Getting Started
-
-## 1.1 Installation
-
-Python3 is required.
-
-1. Clone this repository
-   ```bash
-   git clone https://github.com/EscVM/OIDv4_ToolKit.git
-   ```
-2. Install the required packages
-   ```bash
-   pip3 install -r requirements.txt
-   ```
-Peek inside the requirements file if you have everything already installed. Most of the dependencies are common libraries.
-
-## 1.2 Launch the ToolKit to check the available options
-First of all, if you simply want a quick reminder of al the possible options given by the script, you can simply launch, from your console of choice, the [main.py](main.py). Remember to point always at the main directory of the project
-   ```bash
-   python3 main.py
-   ```
-or in the following way to get more information
-   ```bash
-   python3 main.py -h
-   ```
-
-# 2.0 Use the ToolKit to download images for Object Detection
-The ToolKit permit the download of your dataset in the folder you want (`Dataset`as default). The folder can be imposed with the argument
-`--Dataset` so you can make different dataset with different options inside.
-
-As previously mentioned, there are different available options that can be exploited. Let's see some of them.
-
-## 2.1 Download different classes in separated folders
-Firstly, the ToolKit can be used to download classes in separated folders. The argument `--classes` accepts a list of classes or
-the path to the file.txt (`--classes path/to/file.txt`) that contains the list of all classes one for each lines (classes.txt uploaded as example).
-
-**Note**: for classes that are composed by different
-words please use the `_` character instead of the space (only for the inline use of the argument `--classes`).
-Example: `Polar_bear`.
-
-Let's for example download Apples and Oranges from the validation set. In this case we have to use the following command.
-  ```bash
-   python3 main.py downloader --classes Apple Orange --type_csv validation
-   ```
-The algorith will take care to download all the necessary files and build the directory structure like this:
-
-```
-main_folder
-│   main.py
-│
-└───OID
-    │   file011.txt
-    │   file012.txt
-    │
-    └───csv_folder
-    |    │   class-descriptions-boxable.csv
-    |    │   validation-annotations-bbox.csv
-    |
-    └───Dataset
-        |
-        └─── test
-        |
-        └─── train
-        |
-        └─── validation
-             |
-             └───Apple
-             |     |
-             |     |0fdea8a716155a8e.jpg
-             |     |2fe4f21e409f0a56.jpg
-             |     |...
-             |     └───Labels
-             |            |
-             |            |0fdea8a716155a8e.txt
-             |            |2fe4f21e409f0a56.txt
-             |            |...
-             |
-             └───Orange
-                   |
-                   |0b6f22bf3b586889.jpg
-                   |0baea327f06f8afb.jpg
-                   |...
-                   └───Labels
-                          |
-                          |0b6f22bf3b586889.txt
-                          |0baea327f06f8afb.txt
-                          |...
-```
-If you have already downloaded the different csv files you can simply put them in the `csv_folder`. The script takes automatically care of the download of these files, but if you want to manually download them for whatever reason [here](https://storage.googleapis.com/openimages/web/download.html) you can find them.
-
-If you interupt the downloading script `ctrl+d` you can always restart it from the last image downloaded.
-
-## 2.2 Download multiple classes in a common folder
-This option allows to download more classes, but in a common folder. Also the related notations are mixed together with
- the already explained format (the first element is always the name of the single class). In this way, with a simple
- dictionary it's easy to parse the generated label to get the desired format.
-
-Again if we want to download Apple and Oranges, but in a common folder
-  ```bash
-   python3 main.py downloader --classes Apple Orange --type_csv validation --multiclasses 1
-   ```
-
-### Annotations
-
-<img align="right" src="images/rectangle.png">
-
-In the __original__ dataset the coordinates of the bounding boxes are made in the following way:
-
-**XMin**, **XMax**, **YMin**, **YMax**: coordinates of the box, in normalized image coordinates. XMin is in [0,1], where 0 is the leftmost pixel, and 1 is the rightmost pixel in the image. Y coordinates go from the top pixel (0) to the bottom pixel (1).
-
-However, in order to accomodate a more intuitive representation and give the maximum flexibility, every `.txt` annotation is made like:
-
-`name_of_the_class    left    top     right     bottom`
-
-where each coordinate is denormalized. So, the four different values correspond to the actual number of pixels of the related image.
-
-If you don't need the labels creation use `--noLabels`.
-
-### Optional Arguments
-The annotations of the dataset has been marked with a bunch of boolean values. This attributes are reported below:
-- **IsOccluded**: Indicates that the object is occluded by another object in the image.
-- **IsTruncated**: Indicates that the object extends beyond the boundary of the image.
-- **IsGroupOf**: Indicates that the box spans a group of objects (e.g., a bed of flowers or a crowd of people). We asked annotators to use this tag for cases with more than 5 instances which are heavily occluding each other and are physically touching.
-- **IsDepiction**: Indicates that the object is a depiction (e.g., a cartoon or drawing of the object, not a real physical instance).
-- **IsInside**: Indicates a picture taken from the inside of the object (e.g., a car interior or inside of a building).
-- **n_threads**: Select how many threads you want to use. The ToolKit will take care for you to download multiple images in parallel, considerably speeding up the downloading process.
-- **limit**: Limit the number of images being downloaded. Useful if you want to restrict the size of your dataset.
-- **y**: Answer yes when have to download missing csv files.
-
-Naturally, the ToolKit provides the same options as paramenters in order to filter the downloaded images.
-For example, with:
-  ```bash
-   python3 main.py downloader -y --classes Apple Orange --type_csv validation --image_IsGroupOf 0
-   ```
-only images without group annotations are downloaded.
-
-# 3.0 Download images from Image-Level Labels Dataset for Image Classifiction
-The Toolkit is now able to acess also to the huge dataset without bounding boxes. This dataset is formed by 19,995 classes and it's already divided into train, validation and test. The command used for the download from this dataset is ```downloader_ill``` (Downloader of Image-Level Labels) and requires the argument ```--sub```. This argument selects the sub-dataset between human-verified labels ```h``` (5,655,108 images) and machine-generated labels ```m``` (8,853,429 images). An example of command is:
-```bash
-python3 main.py downloader_ill --sub m --classes Orange --type_csv train --limit 30
-```
-The previously explained commands ```Dataset```, ```multiclasses```, ```n_threads``` and ```limit``` are available.
-The Toolkit automatically will put the dataset and the csv folder in specific folders that are renamed with a `_nl` at the end.
-# Commands sum-up
-
-|                    | downloader | visualizer | downloader_ill |                                                  |
-|-------------------:|:----------:|:----------:|:--------------:|--------------------------------------------------|
-|            Dataset |      O     |      O     |        O       | Dataset folder name                              |
-|            classes |      R     |            |        R       | Considered classes                               |
-|           type_csv |      R     |            |        R       | Train, test or validation dataset                |
-|                  y |      O     |            |        O       | Answer yes when downloading missing csv files    |
-|       multiclasses |      O     |            |        O       | Download classes toghether                       |
-|           noLabels |      O     |            |                | Don't create labels                              |
-|   Image_IsOccluded |      O     |            |                | Consider or not this filter                      |
-|  Image_IsTruncated |      O     |            |                | Consider or not this filter                      |
-|    Image_IsGroupOf |      O     |            |                | Consider or not this filter                      |
-|  Image_IsDepiction |      O     |            |                | Consider or not this filter                      |
-|     Image_IsInside |      O     |            |                | Consider or not this filter                      |
-|          n_threads |      O     |            |        O       | Indicates the maximum threads number             |
-|              limit |      O     |            |        O       | Max number of images to download                 |
-|                sub |            |            |        R       | Human-verified or Machine-generated images (h/m) |
-
-R = required, O = optional
-
-# 4.0 Use the ToolKit to visualize the labeled images
-The ToolKit is useful also for visualize the downloaded images with the respective labels.
-```bash
-   python3 main.py visualizer
-   ```
-  In this way the default `Dataset` folder will be pointed to search the images and labels automatically. To point
-  another folder it's possible to use `--Dataset` optional argument.
-```bash
-   python3 main.py visualizer --Dataset desired_folder
-   ```
-Then the system will ask you which folder to visualize (train, validation or test) and the desired class.
-Hence with `d` (next), `a` (previous) and `q` (exit) you will be able to explore all the images. Follow the menu for all the other options.
-
-<p align="center">
-  <img width="540" height="303" src="images/visualizer_example.gif">
-</p>
-
-# 5.0 Community Contributions
-- [Denis Zuenko](https://github.com/zuenko) has added multithreading to the ToolKit and is currently working on the generalization and speeding up process of the labels creation
-- [Skylion007](https://github.com/Skylion007) has improved labels creation reducing the runtime from O(nm) to O(n). That massively speeds up label generation
-- [Alex March](https://github.com/hosaka) has added the limit option to the ToolKit in order to download only a maximum number of images of a certain class
-- [Michael Baroody](https://github.com/mbaroody) has fixed the toolkit's visualizer for multiword classes
-
-# Citation
-Use this bibtex if you want to cite this repository:
-```
-@misc{OIDv4_ToolKit,
-  title={Toolkit to download and visualize single or multiple classes from the huge Open Images v4 dataset},
-  author={Vittorio, Angelo},
-  year={2018},
-  publisher={Github},
-  journal={GitHub repository},
-  howpublished={\url{https://github.com/EscVM/OIDv4_ToolKit}},
-}
-```
-
-# Reference
-"[We don't need no bounding-boxes: Training object class detectors using only human verification](https://arxiv.org/abs/1602.08405)"Papadopolous et al., CVPR 2016.
+* For the format of the yaml file, please see **step V.3-V.6** take the coco128.yaml

@@ -45,7 +45,6 @@ DIRS = os.listdir(os.getcwd())
 
 # for all train, validation and test folders
 for DIR in DIRS:
-    print("\n\n\n Current Directory ", DIR, os.path.isdir(DIR))
     if os.path.isdir(DIR):
         os.chdir(DIR)
         print("Currently in subdirectory:", DIR)
@@ -68,9 +67,13 @@ for DIR in DIRS:
                         with open(filename) as f:
                             for line in f:
                                 line = line.replace(
-                                    CLASS_DIR, CLASS_DIR.replace(" ", "_")
+                                    CLASS_DIR, CLASS_DIR.lower().replace(" ", "_")
                                 )  ### Some classes have 2 names
-                                print(line)
+                                line = line.replace(
+                                    CLASS_DIR[0].upper()
+                                    + CLASS_DIR[1:].replace("_", " "),
+                                    CLASS_DIR.lower().replace(" ", "_"),
+                                )
                                 for class_type in classes:
                                     # print(class_type)
                                     line = re.sub(

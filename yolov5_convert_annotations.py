@@ -14,20 +14,21 @@ YOLO_ORGANIZE = False
 # function that turns XMin, YMin, XMax, YMax coordinates to normalized yolo format
 def convert(filename_str, coords):
     os.chdir("..")
-    load_path=os.path.join(os.getcwd(),filename_str)
+    load_path = os.path.join(os.getcwd(), filename_str)
     image = cv2.imread(load_path + ".jpg")
     coords[2] -= coords[0]
     coords[3] -= coords[1]
-    x_diff = int(coords[2]/2)
-    y_diff = int(coords[3]/2)
-    coords[0] = coords[0]+x_diff
-    coords[1] = coords[1]+y_diff
+    x_diff = int(coords[2] / 2)
+    y_diff = int(coords[3] / 2)
+    coords[0] = coords[0] + x_diff
+    coords[1] = coords[1] + y_diff
     coords[0] /= int(image.shape[1])
     coords[1] /= int(image.shape[0])
     coords[2] /= int(image.shape[1])
     coords[3] /= int(image.shape[0])
     os.chdir("Label")
     return coords
+
 
 ROOT_DIR = os.getcwd()
 
@@ -44,10 +45,11 @@ DIRS = os.listdir(os.getcwd())
 
 # for all train, validation and test folders
 for DIR in DIRS:
+    print("\n\n\n Current Directory ", DIR, os.path.isdir(DIR))
     if os.path.isdir(DIR):
         os.chdir(DIR)
         print("Currently in subdirectory:", DIR)
-        
+
         CLASS_DIRS = os.listdir(os.getcwd())
         # for all class folders step into directory to change annotations
         for CLASS_DIR in CLASS_DIRS:
@@ -65,18 +67,47 @@ for DIR in DIRS:
                         annotations = []
                         with open(filename) as f:
                             for line in f:
-                                line=line.replace(CLASS_DIR,CLASS_DIR.replace(" ", "_")) ### Some classes have 2 names
+                                line = line.replace(
+                                    CLASS_DIR, CLASS_DIR.replace(" ", "_")
+                                )  ### Some classes have 2 names
+                                print(line)
                                 for class_type in classes:
                                     # print(class_type)
-                                    line=re.sub(rf'\b{class_type}\b', str(classes.get(class_type)), line) ### Regex to handle spaces 
+                                    line = re.sub(
+                                        rf"\b{class_type}\b",
+                                        str(classes.get(class_type)),
+                                        line,
+                                    )  ### Regex to handle spaces
                                     # line = line.replace(class_type, str(classes.get(class_type)))
                                 labels = line.split()
-                                coords = np.asarray([float(labels[1]), float(labels[2]), float(labels[3]), float(labels[4])])
+                                coords = np.asarray(
+                                    [
+                                        float(labels[1]),
+                                        float(labels[2]),
+                                        float(labels[3]),
+                                        float(labels[4]),
+                                    ]
+                                )
                                 coords = convert(filename_str, coords)
-                                labels[1], labels[2], labels[3], labels[4] = coords[0], coords[1], coords[2], coords[3]
-                                newline = str(labels[0]) + " " + str(labels[1]) + " " + str(labels[2]) + " " + str(labels[3]) + " " + str(labels[4])
+                                labels[1], labels[2], labels[3], labels[4] = (
+                                    coords[0],
+                                    coords[1],
+                                    coords[2],
+                                    coords[3],
+                                )
+                                newline = (
+                                    str(labels[0])
+                                    + " "
+                                    + str(labels[1])
+                                    + " "
+                                    + str(labels[2])
+                                    + " "
+                                    + str(labels[3])
+                                    + " "
+                                    + str(labels[4])
+                                )
                                 line = line.replace(line, newline)
-                    
+
                                 annotations.append(line)
 
                             f.close()
@@ -92,7 +123,7 @@ for DIR in DIRS:
             os.chdir("..")
             os.chdir("..")
 
-        # To organize all the image in the folder to a new folder
+            # To organize all the image in the folder to a new folder ( breaks the code as it cannot be run again )
             if YOLO_ORGANIZE == True:
                 if os.path.isdir(CLASS_DIR):
                     os.chdir(CLASS_DIR)
@@ -104,11 +135,12 @@ for DIR in DIRS:
                         # print("Moving Images for Class: ", CLASS_DIR)
                         filename_str = str.split(filename, ".")[0]
                         if filename.endswith(".jpg"):
-                            src_path = str(os.getcwd()) +"\\"+ filename
+                            src_path = str(os.getcwd()) + "\\" + filename
                             print(src_path)
                             os.chdir("Images")
-                            dst_path = str(os.getcwd()) +"\\"+ filename
+                            dst_path = str(os.getcwd()) + "\\" + filename
                             print(dst_path)
                             shutil.move(src_path, dst_path)
                             os.chdir("..")
                 os.chdir("..")
+        os.chdir("..")

@@ -9,9 +9,25 @@ import fileinput
 import shutil
 import re
 
+
+"""
+  converts the "labels" from OID (open image dataset) to Yolo format
+
+  requires "class_names.txt" in the directory of the dataset (where the images are stored)
+  EG: class_names.txt 
+      Bicycle
+      Bicycle helmet
+      Person
+
+  It will convert the object name to 
+    "Bicycle helmet" -> "bicycle_helmet"
+    
+  Labels
+    "563.84 127.31507800000001 622.72 161.223436" -> "0.5789453125 0.2101394105571848 0.057499999999999996 0.04971899999999997"
+    Bounding box in pixels -> BottomLeftX BottomLeftY Height Width
+"""
+
 YOLO_ORGANIZE = False
-
-
 # function that turns XMin, YMin, XMax, YMax coordinates to normalized yolo format
 def convert(filename_str, coords):
     os.chdir("..")
